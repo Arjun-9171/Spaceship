@@ -5,17 +5,18 @@ screen_width = 1280
 screen_height = 720
 display_screen = pygame.display.set_mode((screen_width, screen_height))
 
-lazer = pygame.image.load('Lazer.png')
-lazer = pygame.transform.scale(lazer, (30, 30))
-lazer = pygame.transform.rotate(lazer, -90)
+rocket = pygame.image.load('rocket.png')
+rocket = pygame.transform.scale(rocket, (100, 100))
+#rocket = pygame.transform.rotate(rocket, -90)
 
 #Break
 
-enemy_spaceship = pygame.image.load('Enemy_spaceship.gif')
-enemy_spaceship = pygame.transform.scale(enemy_spaceship, (145, 145))
-enemy_spaceship = pygame.transform.rotate(enemy_spaceship, 90)
+enemy_spaceship = pygame.image.load('Enemy_spaceship.png')
+enemy_spaceship = pygame.transform.scale(enemy_spaceship, (80, 80))
+#enemy_spaceship = pygame.transform.rotate(enemy_spaceship)
 enemy_x_pos = 900
 enemy_y_pos = 300
+enemy_spaceship_rect = enemy_spaceship.get_rect()
 #Break
 
 background = pygame.image.load('bg.jpg')
@@ -28,28 +29,42 @@ spaceship = pygame.transform.scale(spaceship, (100, 100))
 spaceship = pygame.transform.rotate(spaceship, -90)
 spaceship_x_pos = 200
 spaceship_y_pos = 300
+spaceship_rect = spaceship.get_rect()
 
 #Break
 
-lazer_x_pos = 245
-lazer_y_pos = 335
-lazer_speed = 0
+rocket_x_pos = 200
+rocket_y_pos = 300
+rocket_speed = 0
 triggered = False
+rocket_rect = rocket.get_rect()
+
+points = 6
+font = pygame.font.SysFont("Timesnewroman.fft", 50)
 
 def respawn_enemy():
-  enemy_y_pos = random.randint(1, 715)
+  enemy_y_pos = random.randint(1, 700)
   enemy_x_pos = 1300
-  return[enemy_y_pos, enemy_x_pos]
+  return[enemy_x_pos, enemy_y_pos]
 
-def respawn_lazer():
+def respawn_rocket():
   triggered = False
-  respawn_lazer_x = spaceship_x_pos
-  respawn_lazer_y = spaceship_y_pos
-  lazer_speed = 0
-  return[triggered, respawn_lazer_x, respawn_lazer_y, lazer_speed]
+  respawn_rocket_x = spaceship_x_pos
+  respawn_rocket_y = spaceship_y_pos
+  rocket_speed = 0
+  return[triggered, respawn_rocket_x, respawn_rocket_y, rocket_speed]
 
-
-  
+def collision(): 
+  global points
+  if spaceship_rect.colliderect(enemy_spaceship_rect):
+    points -= 1
+    return True
+  elif rocket_rect.colliderect(enemy_spaceship_rect):
+    triggered, rocket_x_pos, rocket_y_pos, rocket_speed = respawn_rocket()
+    points += 1
+    return True
+  else:
+    return False
 
 
 run = True
@@ -58,40 +73,62 @@ while run:
     if event.type == pygame.QUIT:
       run = False
   
+  
   display_screen.blit(background, (0, 0))
   screen_moving = screen_width % background.get_rect().width
   display_screen.blit(background, (screen_moving - background.get_rect().width, 0))
 
   if screen_moving < 1280:
     display_screen.blit(background, (screen_moving, 0))
+    
   key = pygame.key.get_pressed()
   if key[pygame.K_w] and spaceship_y_pos > 1:
     spaceship_y_pos = spaceship_y_pos - 1
     if not triggered:
-      lazer_y_pos = lazer_y_pos - 1
+      rocket_y_pos = rocket_y_pos - 1
     
   if key[pygame.K_s] and spaceship_y_pos < 630:
     spaceship_y_pos = spaceship_y_pos + 1
     if not triggered:
-      lazer_y_pos = lazer_y_pos + 1
+      rocket_y_pos = rocket_y_pos + 1
 
   if key[pygame.K_SPACE]:
     triggered = True
-    lazer_speed = 10
+    rocket_speed = 10
 
-  if lazer_speed > 1300:
-    triggered, respawn_lazer_x, respawn_lazer_y, lazer_speed = respawn_lazer()
+  if rocket_x_pos > 1300:
+    triggered, rocket_x_pos, rocket_y_pos, rocket_speed = respawn_rocket()
   
-  if enemy_x_pos < 0:
-    enemy_y_pos = respawn_enemy()[0]
-    enemy_x_pos = respawn_enemy()[1]
+  if enemy_x_pos <= -60 or collision():
+    enemy_x_pos = respawn_enemy()[0]
+    enemy_y_pos = respawn_enemy()[1]
+   
+    
+   
+  
+
+
+  spaceship_rect.x = spaceship_x_pos
+  enemy_spaceship_rect.x = enemy_x_pos
+  rocket_rect.x = rocket_x_pos
+  spaceship_rect.y = spaceship_y_pos
+  enemy_spaceship_rect.y = enemy_y_pos
+  rocket_rect.y = rocket_y_pos
 
   screen_width = screen_width - 0.7
-  lazer_x_pos = lazer_x_pos + lazer_speed
+  rocket_x_pos = rocket_x_pos + rocket_speed
   enemy_x_pos = enemy_x_pos - 1
+  
+  #pygame.draw.rect(display_screen, 'red', spaceship_rect, 5)
+  pygame.draw.rect(display_screen, 'red', enemy_spaceship_rect, 5)
+  #pygame.draw.rect(display_screen, 'red', rocket_rect, 5)
 
+  score = font.render(f'Points: {int(points)}', True, "green")
+
+
+  display_screen.blit(score, (10, 10))
+  display_screen.blit(rocket, (rocket_x_pos, rocket_y_pos))
   display_screen.blit(spaceship, (spaceship_x_pos, spaceship_y_pos))
-  display_screen.blit(lazer, (lazer_x_pos, lazer_y_pos))
   display_screen.blit(enemy_spaceship, (enemy_x_pos, enemy_y_pos))
  
 
