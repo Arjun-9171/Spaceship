@@ -39,11 +39,18 @@ rocket_speed = 0
 triggered = False
 rocket_rect = rocket.get_rect()
 
-points = 6
+#Break 
+
+lives = 4
+#font_for_lives = pygame.font.SysFont("Timesnewroman.fft", 50)
+
+#Break
+
+points = 0
 font = pygame.font.SysFont("Timesnewroman.fft", 50)
 
 def respawn_enemy():
-  enemy_y_pos = random.randint(1, 700)
+  enemy_y_pos = random.randint(1, 670)
   enemy_x_pos = 1300
   return[enemy_x_pos, enemy_y_pos]
 
@@ -56,16 +63,16 @@ def respawn_rocket():
 
 def collision(): 
   global points
+  global lives
   if spaceship_rect.colliderect(enemy_spaceship_rect):
-    points -= 1
+    lives -= 1
     return True
   elif rocket_rect.colliderect(enemy_spaceship_rect):
-    triggered, rocket_x_pos, rocket_y_pos, rocket_speed = respawn_rocket()
     points += 1
     return True
   else:
     return False
-
+  
 
 run = True
 while run:
@@ -95,6 +102,7 @@ while run:
   if key[pygame.K_SPACE]:
     triggered = True
     rocket_speed = 10
+  
 
   if rocket_x_pos > 1300:
     triggered, rocket_x_pos, rocket_y_pos, rocket_speed = respawn_rocket()
@@ -102,7 +110,19 @@ while run:
   if enemy_x_pos <= -60 or collision():
     enemy_x_pos = respawn_enemy()[0]
     enemy_y_pos = respawn_enemy()[1]
-   
+  
+  
+  game_over_font = pygame.font.SysFont("Timesnewroman.fft", 100)
+  #replay_font = pygame.font.SysFont("Timesnewroman.fft", 100)
+  if lives == 0:
+    game_over_text = game_over_font.render("GAME OVER", True, (255, 0, 0))
+    #replay_text = replay_font.render("PRESS ENTER TO CONTINUE", True, (255, 0, 0))
+    display_screen.blit(game_over_text, (400, 300))
+    #display_screen.blit(replay_text, (400, 450))
+    #if key[pygame.K_KP_ENTER]:
+    pygame.display.update()
+    pygame.time.delay(3000)  
+    run = False
     
    
   
@@ -120,17 +140,19 @@ while run:
   enemy_x_pos = enemy_x_pos - 1
   
   #pygame.draw.rect(display_screen, 'red', spaceship_rect, 5)
-  pygame.draw.rect(display_screen, 'red', enemy_spaceship_rect, 5)
+  #pygame.draw.rect(display_screen, 'red', enemy_spaceship_rect, 5)
   #pygame.draw.rect(display_screen, 'red', rocket_rect, 5)
 
   score = font.render(f'Points: {int(points)}', True, "green")
-
+  hearts = font.render(f'Lives: {int(lives)}', True, "red")
 
   display_screen.blit(score, (10, 10))
+  display_screen.blit(hearts, (1140, 10))
   display_screen.blit(rocket, (rocket_x_pos, rocket_y_pos))
   display_screen.blit(spaceship, (spaceship_x_pos, spaceship_y_pos))
   display_screen.blit(enemy_spaceship, (enemy_x_pos, enemy_y_pos))
- 
+
+
 
   
   pygame.display.update()
