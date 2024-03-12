@@ -19,7 +19,7 @@ enemy_y_pos = 300
 enemy_spaceship_rect = enemy_spaceship.get_rect()
 #Break
 
-background = pygame.image.load('bg.jpg')
+background = pygame.image.load('BG_image.jpg')
 background = pygame.transform.scale(background, (screen_width, screen_height))
 
 #Break
@@ -41,7 +41,7 @@ rocket_rect = rocket.get_rect()
 
 #Break 
 
-lives = 4
+lives = 5
 #font_for_lives = pygame.font.SysFont("Timesnewroman.fft", 50)
 
 #Break
@@ -72,7 +72,25 @@ def collision():
     return True
   else:
     return False
-  
+
+start_background = pygame.image.load('start_menu.jpg')
+start_background = pygame.transform.scale(start_background, (screen_width, screen_height))
+main_menu_font = pygame.font.SysFont("Timesnewroman.fft", 100)
+main_menu = True
+while main_menu:
+  for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+      pygame.quit()
+  main_menu_text = main_menu_font.render("Press F to Start", True, (30, 208, 194))
+  display_screen.blit(start_background, (0, 0))
+  display_screen.blit(main_menu_text, (375, 360))
+  key = pygame.key.get_pressed()
+  if key[pygame.K_f]:
+    break
+  pygame.display.update()
+
+
+
 
 run = True
 while run:
@@ -103,23 +121,21 @@ while run:
     triggered = True
     rocket_speed = 10
   
+   
 
   if rocket_x_pos > 1300:
     triggered, rocket_x_pos, rocket_y_pos, rocket_speed = respawn_rocket()
   
   if enemy_x_pos <= -60 or collision():
+    lives -= 1
     enemy_x_pos = respawn_enemy()[0]
     enemy_y_pos = respawn_enemy()[1]
   
   
   game_over_font = pygame.font.SysFont("Timesnewroman.fft", 100)
-  #replay_font = pygame.font.SysFont("Timesnewroman.fft", 100)
   if lives == 0:
     game_over_text = game_over_font.render("GAME OVER", True, (255, 0, 0))
-    #replay_text = replay_font.render("PRESS ENTER TO CONTINUE", True, (255, 0, 0))
     display_screen.blit(game_over_text, (400, 300))
-    #display_screen.blit(replay_text, (400, 450))
-    #if key[pygame.K_KP_ENTER]:
     pygame.display.update()
     pygame.time.delay(3000)  
     run = False
@@ -137,7 +153,7 @@ while run:
 
   screen_width = screen_width - 0.7
   rocket_x_pos = rocket_x_pos + rocket_speed
-  enemy_x_pos = enemy_x_pos - 1
+  enemy_x_pos = enemy_x_pos - 2
   
   #pygame.draw.rect(display_screen, 'red', spaceship_rect, 5)
   #pygame.draw.rect(display_screen, 'red', enemy_spaceship_rect, 5)
