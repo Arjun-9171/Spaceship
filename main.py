@@ -1,4 +1,5 @@
 import pygame, random
+from pygame import mixer
 
 pygame.init()
 screen_width = 1280
@@ -40,8 +41,13 @@ triggered = False
 rocket_rect = rocket.get_rect()
 
 #Break 
-
-lives = 5
+mixer.init()
+global gunshot
+gunshot = mixer.Sound('lazer.mp3')
+gunshot.set_volume(0.05)
+global soundtrack
+soundtrack = mixer.music.load('POTC_song.mp3')
+lives = 6
 #font_for_lives = pygame.font.SysFont("Timesnewroman.fft", 50)
 
 #Break
@@ -89,6 +95,8 @@ while main_menu:
     break
   pygame.display.update()
 
+mixer.init()
+mixer.music.play()
 
 
 
@@ -97,8 +105,7 @@ while run:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       run = False
-  
-  
+ 
   display_screen.blit(background, (0, 0))
   screen_moving = screen_width % background.get_rect().width
   display_screen.blit(background, (screen_moving - background.get_rect().width, 0))
@@ -120,14 +127,20 @@ while run:
   if key[pygame.K_SPACE]:
     triggered = True
     rocket_speed = 10
+    mixer.Sound.play(gunshot)
+    
   
    
 
   if rocket_x_pos > 1300:
     triggered, rocket_x_pos, rocket_y_pos, rocket_speed = respawn_rocket()
   
-  if enemy_x_pos <= -60 or collision():
+  if enemy_x_pos <= -60:
     lives -= 1
+    enemy_x_pos = respawn_enemy()[0]
+    enemy_y_pos = respawn_enemy()[1]
+  
+  if collision():
     enemy_x_pos = respawn_enemy()[0]
     enemy_y_pos = respawn_enemy()[1]
   
