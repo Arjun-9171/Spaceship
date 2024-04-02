@@ -1,4 +1,4 @@
-import pygame, random
+import pygame, random, time
 from pygame import mixer
 
 pygame.init()
@@ -19,10 +19,6 @@ enemy_x_pos = 900
 enemy_y_pos = 300
 enemy_spaceship_rect = enemy_spaceship.get_rect()
 #Break
-
-background = pygame.image.load('BG_image.jpg')
-background = pygame.transform.scale(background, (screen_width, screen_height))
-
 #Break
 
 spaceship = pygame.image.load('Spaceship.png')
@@ -42,9 +38,9 @@ rocket_rect = rocket.get_rect()
 
 #Break 
 mixer.init()
-global gunshot
-gunshot = mixer.Sound('lazer.mp3')
-gunshot.set_volume(0.05)
+global lazer
+lazer = mixer.Sound('Assets/lazer.mp3')
+lazer.set_volume(0.05)
 global soundtrack
 soundtrack = mixer.music.load('POTC_song.mp3')
 lives = 6
@@ -75,9 +71,39 @@ def collision():
     return True
   elif rocket_rect.colliderect(enemy_spaceship_rect):
     points += 1
+    pos = [enemy_x_pos, enemy_y_pos]
+    explosion = Explosion(pos[0], pos[1])
+    explosion_group.add(explosion)
+    hitbox.shoot()
     return True
   else:
     return False
+
+class Explosion(pygame.sprite.Sprite):
+  def __init__(self, x, y):
+    pygame.sprite.Sprite.__init__(self)
+    self.images = []
+    for num in range (1, 6):
+      img = pygame.image.load(f"Assets/explosions_imgs/Explosion{num}.png")
+      img = pygame.transform.scale(img, (125, 75))
+      self.images.append(img)
+    self.index = 0
+    self.image = self.images[self.index]
+    self.rect = self.image.get_rect()
+    self.rect.center = [x, y]
+    self.counter = 0
+ 
+
+  def update(self):
+    explosion_speed = 15
+    self.counter += 1
+    if self.counter >= explosion_speed and self.index < len(self.images) - 1:
+      self.counter = 0
+      self.index += 1
+      self.image = self.images[self.index]
+    
+    if self.index >= len(self.images) - 1 and self.counter >= explosion_speed:
+      self.kill()
 
 start_background = pygame.image.load('start_menu.jpg')
 start_background = pygame.transform.scale(start_background, (screen_width, screen_height))
@@ -98,18 +124,38 @@ while main_menu:
 mixer.init()
 mixer.music.play()
 
+class Hitbox(pygame.sprite.Sprite):
+  def __init__ (self,picture_path):
+    super().__init__()
+    self.image=pygame.image.load(picture_path)
+    self.rect=self.image.get_rect()
+    self.lazer = pygame.mixer.Sound("Assets/lazer.mp3")
+  def shoot(self):
+    self.lazer.play()
+  def update(self):
+    self.rect.center=pygame.mouse.get_pos()
 
+hitbox = Hitbox("Assets/hitbox.jpg")
+hitbox_group = pygame.sprite.Group()
+hitbox_group.add(hitbox)
+
+explosion_group = pygame.sprite.Group()
+
+background = pygame.image.load('BG_image.jpg')
+background = pygame.transform.scale(background, (screen_width, screen_height))
 
 run = True
 while run:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
-      run = False
+      run = False  
+      exit() 
  
   display_screen.blit(background, (0, 0))
   screen_moving = screen_width % background.get_rect().width
   display_screen.blit(background, (screen_moving - background.get_rect().width, 0))
-
+  explosion_group.draw(display_screen)
+  explosion_group.update()
   if screen_moving < 1280:
     display_screen.blit(background, (screen_moving, 0))
     
@@ -127,7 +173,8 @@ while run:
   if key[pygame.K_SPACE]:
     triggered = True
     rocket_speed = 10
-    mixer.Sound.play(gunshot)
+    mixer.Sound.play(lazer)
+
     
   
    
