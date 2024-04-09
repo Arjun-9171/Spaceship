@@ -40,9 +40,14 @@ rocket_rect = rocket.get_rect()
 mixer.init()
 global lazer
 lazer = mixer.Sound('Assets/lazer.mp3')
-lazer.set_volume(0.05)
-global soundtrack
-soundtrack = mixer.music.load('POTC_song.mp3')
+lazer.set_volume(0.04)
+global soundtrack_1
+global soundtrack_2
+global soundtrack_3
+soundtrack_1 = mixer.Sound('Assets/Mozart.mp3') 
+soundtrack_2 = mixer.Sound('Assets/The_Beach.mp3') 
+soundtrack_3 = mixer.Sound('Assets/POTC_song.mp3') 
+soundtrack_2.set_volume(0.04)
 lives = 6
 #font_for_lives = pygame.font.SysFont("Timesnewroman.fft", 50)
 
@@ -71,39 +76,40 @@ def collision():
     return True
   elif rocket_rect.colliderect(enemy_spaceship_rect):
     points += 1
-    pos = [enemy_x_pos, enemy_y_pos]
-    explosion = Explosion(pos[0], pos[1])
-    explosion_group.add(explosion)
+    # pos = [enemy_x_pos, enemy_y_pos]
+    # explosion = Explosion(pos[0], pos[1])
+    # explosion_group.add(explosion)
     hitbox.shoot()
     return True
   else:
     return False
 
-class Explosion(pygame.sprite.Sprite):
-  def __init__(self, x, y):
-    pygame.sprite.Sprite.__init__(self)
-    self.images = []
-    for num in range (1, 6):
-      img = pygame.image.load(f"Assets/explosions_imgs/Explosion{num}.png")
-      img = pygame.transform.scale(img, (125, 75))
-      self.images.append(img)
-    self.index = 0
-    self.image = self.images[self.index]
-    self.rect = self.image.get_rect()
-    self.rect.center = [x, y]
-    self.counter = 0
+# class Explosion(pygame.sprite.Sprite):
+#   def __init__(self, explosion_x, explosion_y):
+#     pygame.sprite.Sprite.__init__(self)
+#     self.images = []
+#     for num in range (1, 6):
+#       img = pygame.image.load(f"Assets/explosions_imgs/Explosion{num}.png")
+#       img = pygame.transform.scale(img, (75, 75))
+#       self.images.append(img)
+      
+#     self.index = 0
+#     self.image = self.images[self.index]
+#     self.rect = self.image.get_rect()
+#     self.rect.center = [explosion_x, explosion_y]
+#     self.counter = 0
  
 
-  def update(self):
-    explosion_speed = 15
-    self.counter += 1
-    if self.counter >= explosion_speed and self.index < len(self.images) - 1:
-      self.counter = 0
-      self.index += 1
-      self.image = self.images[self.index]
+#   def update(self):
+#     explosion_speed = 15
+#     self.counter += 1
+#     if self.counter >= explosion_speed and self.index < len(self.images) - 1:
+#       self.counter = 0
+#       self.index += 1
+#       self.image = self.images[self.index]
     
-    if self.index >= len(self.images) - 1 and self.counter >= explosion_speed:
-      self.kill()
+#     if self.index >= len(self.images) - 1 and self.counter >= explosion_speed:
+#       self.kill()
 
 start_background = pygame.image.load('start_menu.jpg')
 start_background = pygame.transform.scale(start_background, (screen_width, screen_height))
@@ -122,7 +128,7 @@ while main_menu:
   pygame.display.update()
 
 mixer.init()
-mixer.music.play()
+mixer.Sound.play(soundtrack_1)
 
 class Hitbox(pygame.sprite.Sprite):
   def __init__ (self,picture_path):
@@ -141,8 +147,9 @@ hitbox_group.add(hitbox)
 
 explosion_group = pygame.sprite.Group()
 
-background = pygame.image.load('BG_image.jpg')
-background = pygame.transform.scale(background, (screen_width, screen_height))
+background_level_1 = pygame.image.load('BG_01.png')
+background_level_1 = pygame.transform.scale(background_level_1, (screen_width, screen_height))
+
 
 run = True
 while run:
@@ -151,13 +158,13 @@ while run:
       run = False  
       exit() 
  
-  display_screen.blit(background, (0, 0))
-  screen_moving = screen_width % background.get_rect().width
-  display_screen.blit(background, (screen_moving - background.get_rect().width, 0))
+  display_screen.blit(background_level_1, (0, 0))
+  screen_moving = screen_width % background_level_1.get_rect().width
+  display_screen.blit(background_level_1, (screen_moving - background_level_1.get_rect().width, 0))
   explosion_group.draw(display_screen)
   explosion_group.update()
   if screen_moving < 1280:
-    display_screen.blit(background, (screen_moving, 0))
+    display_screen.blit(background_level_1, (screen_moving, 0))
     
   key = pygame.key.get_pressed()
   if key[pygame.K_w] and spaceship_y_pos > 1:
@@ -175,8 +182,12 @@ while run:
     rocket_speed = 10
     mixer.Sound.play(lazer)
 
+  if points >= 80: 
+    mixer.Sound.stop(soundtrack_1)
+    mixer.Sound.play(soundtrack_2)
+    #change background
+    #Reset the number of lives
     
-  
    
 
   if rocket_x_pos > 1300:
